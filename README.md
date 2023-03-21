@@ -5,7 +5,7 @@
 
 This repository contains the code for our paper "DAA: A Delta Age AdaIN operation for age estimation via binary code transformer".
 ![image](https://user-images.githubusercontent.com/18466019/226555205-90e59399-4a8a-43cf-976f-61faceaac744.png)
-
+The preprint version is public at [arxiv](https://arxiv.org/abs/2303.07929)
 # Code
  We will release them soon.
  
