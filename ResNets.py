@@ -62,7 +62,7 @@ class ResnetEncoder(nn.Module):
 
       
 
-    def forward(self, x, run_info):
+    def forward(self, x):
         # encoder
         x_first_conv = self.firstconv(x)
         x = self.firstbn(x_first_conv)
