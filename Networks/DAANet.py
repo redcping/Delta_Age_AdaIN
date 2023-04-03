@@ -39,7 +39,7 @@ class DAA(nn.Module):
         
         face_encoder_name = net_info['backbone'].lower()
         
-        if face_encoder_name =='C3AE':
+        if face_encoder_name =='c3ae':
             self.da_channels = 32
             self.face_encoder = C3AE()
         elif 'resnet' in face_encoder_name:
