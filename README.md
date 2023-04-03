@@ -8,9 +8,9 @@ This repository contains the code for our paper "DAA: A Delta Age AdaIN operatio
 The preprint version is public at [arxiv](https://arxiv.org/abs/2303.07929)
 
 # Code
- Step1. Dataset generation, including training and testing samples and a csv file.
- Step2. Configure config.py for corresponding training.
- Step3. Please refer to the paper description to configure config.py, and then use train.py for training and testing.
+ Step1. Dataset generation, including training and testing samples and a csv file.  
+ Step2. Configure config.py for corresponding training.  
+ Step3. Please refer to the paper description to configure config.py, and then use train.py for training and testing.  
  
 # Citation
 If you find this work helpful in your research, please consider citing our paper:
