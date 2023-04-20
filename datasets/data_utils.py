@@ -166,10 +166,6 @@ class DataSet(torch.utils.data.Dataset):
         for k, v in sample.items():
             if k not in ['gt_box','image']:
                 labels[k] = torch.tensor(v).float()
-        #self.ccc=self.ccc+1
-        #if "IR" in image_fn:
-        #    print(index,image_fn,rgbs.size(),labels['gt_emotion'])
-        #labels['sur'] = torch.tensor([sur]).float()
         return rgbs, labels
 
     def __len__(self):
