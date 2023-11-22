@@ -4,7 +4,7 @@ class Config:
     def __init__(self):
         
         #data
-        self.datanames = 'megaage_asian'
+        self.datanames = 'utkface'
         self.data_folder = './datasets/'
         self.do_aug = True
         self.num_works = 4
@@ -12,7 +12,7 @@ class Config:
         # train
         self.batch_size = 64
         self.lr = 1e-3
-        self.epochs = 200
+        self.epochs = 50
         self.use_multiple_gpu=False
         self.device_ids=[0,1] if self.use_multiple_gpu else [0]
         self.pre_epoch = 0
