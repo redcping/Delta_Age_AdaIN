@@ -5,8 +5,12 @@ from align_faces import warp_and_crop_face, get_reference_facial_points
 from mtcnn.detector import MtcnnDetector
 
 
-def process(img, output_size):
+def process(detector, img, output_size, output_path):
     _, facial5points = detector.detect_faces(img)
+
+    if len(facial5points) < 1:
+        # if there is no facial5 point features then the image won't be created
+        return False
     facial5points = np.reshape(facial5points[0], (2, 5))
 
     default_square = True
@@ -20,15 +24,15 @@ def process(img, output_size):
 
     # dst_img = warp_and_crop_face(raw, facial5points, reference_5pts, crop_size)
     dst_img = warp_and_crop_face(
-        raw, facial5points, reference_pts=reference_5pts, crop_size=output_size
+        img, facial5points, reference_pts=reference_5pts, crop_size=output_size
     )
     cv.imwrite(
-        "images/1_mtcnn_aligned_{}x{}.jpg".format(output_size[0], output_size[1]),
+        output_path,
         dst_img,
     )
     # img = cv.resize(raw, (224, 224))
     # cv.imwrite('images/{}_img.jpg'.format(i), img)
-
+    return True
 
 if __name__ == "__main__":
     detector = MtcnnDetector()

@@ -10,9 +10,9 @@ class Config:
         self.num_works = 4
 
         # train
-        self.batch_size = 64
-        self.lr = 1e-3
-        self.epochs = 50
+        self.batch_size = 32
+        self.lr = 1e-2
+        self.epochs = 5
         self.use_multiple_gpu = False
         self.device_ids = [0, 1] if self.use_multiple_gpu else [0]
         self.pre_epoch = 0

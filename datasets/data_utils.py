@@ -113,6 +113,7 @@ class DataSetFactory:
                 data = csv.reader(csvin)
                 next(data)
                 for row in data:
+                    print(row)
                     age = int(float(row[0]) + 0.5)
                     if (
                         age < 0
