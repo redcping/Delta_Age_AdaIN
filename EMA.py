@@ -2,31 +2,32 @@ import torch
 
 
 class EMA(object):
-    '''
-        apply expontential moving average to a model. This should have same function as the `tf.train.ExponentialMovingAverage` of tensorflow.
-        usage:
-            model = resnet()
-            model.train()
-            ema = EMA(model, 0.9999)
-            ....
-            for img, lb in dataloader:
-                loss = ...
-                loss.backward()
-                optim.step()
-                ema.update_params() # apply ema
-            evaluate(model)  # evaluate with original model as usual
-            ema.apply_shadow() # copy ema status to the model
-            evaluate(model) # evaluate the model with ema paramters
-            ema.restore() # resume the model parameters
-        args:
-            - model: the model that ema is applied
-            - alpha: each parameter p should be computed as p_hat = alpha * p + (1. - alpha) * p_hat
-            - buffer_ema: whether the model buffers should be computed with ema method or just get kept
-        methods:
-            - update_params(): apply ema to the model, usually call after the optimizer.step() is called
-            - apply_shadow(): copy the ema processed parameters to the model
-            - restore(): restore the original model parameters, this would cancel the operation of apply_shadow()
-    '''
+    """
+    apply expontential moving average to a model. This should have same function as the `tf.train.ExponentialMovingAverage` of tensorflow.
+    usage:
+        model = resnet()
+        model.train()
+        ema = EMA(model, 0.9999)
+        ....
+        for img, lb in dataloader:
+            loss = ...
+            loss.backward()
+            optim.step()
+            ema.update_params() # apply ema
+        evaluate(model)  # evaluate with original model as usual
+        ema.apply_shadow() # copy ema status to the model
+        evaluate(model) # evaluate the model with ema paramters
+        ema.restore() # resume the model parameters
+    args:
+        - model: the model that ema is applied
+        - alpha: each parameter p should be computed as p_hat = alpha * p + (1. - alpha) * p_hat
+        - buffer_ema: whether the model buffers should be computed with ema method or just get kept
+    methods:
+        - update_params(): apply ema to the model, usually call after the optimizer.step() is called
+        - apply_shadow(): copy the ema processed parameters to the model
+        - restore(): restore the original model parameters, this would cancel the operation of apply_shadow()
+    """
+
     def __init__(self, model, alpha, buffer_ema=True):
         self.step = 0
         self.model = model
@@ -42,14 +43,12 @@ class EMA(object):
         state = self.model.state_dict()
         for name in self.param_keys:
             self.shadow[name].copy_(
-                decay * self.shadow[name]
-                + (1 - decay) * state[name]
+                decay * self.shadow[name] + (1 - decay) * state[name]
             )
         for name in self.buffer_keys:
             if self.buffer_ema:
                 self.shadow[name].copy_(
-                    decay * self.shadow[name]
-                    + (1 - decay) * state[name]
+                    decay * self.shadow[name] + (1 - decay) * state[name]
                 )
             else:
                 self.shadow[name].copy_(state[name])
@@ -63,16 +62,11 @@ class EMA(object):
         self.model.load_state_dict(self.backup)
 
     def get_model_state(self):
-        return {
-            k: v.clone().detach()
-            for k, v in self.model.state_dict().items()
-        }
+        return {k: v.clone().detach() for k, v in self.model.state_dict().items()}
 
 
-
-if __name__ == '__main__':
-
-    print('=====')
+if __name__ == "__main__":
+    print("=====")
     model = torch.nn.BatchNorm1d(5)
     ema = EMA(model, 0.9, 0.02, 0.002)
     inten = torch.randn(10, 5)

@@ -11,7 +11,7 @@ from mtcnn.models import PNet, RNet, ONet
 
 
 class MtcnnDetector:
-    def __init__(self, net='mtcnn', type='cuda'):
+    def __init__(self, net="mtcnn", type="cuda"):
         cudnn.benchmark = True
         self.net = net
         self.device = torch.device(type)
@@ -19,9 +19,13 @@ class MtcnnDetector:
         self.rnet = RNet().to(self.device)
         self.onet = ONet().to(self.device)
 
-    def detect_faces(self, image, min_face_size=20.0,
-                     thresholds=[0.6, 0.7, 0.7],
-                     nms_thresholds=[0.7, 0.7, 0.7]):
+    def detect_faces(
+        self,
+        image,
+        min_face_size=20.0,
+        thresholds=[0.6, 0.7, 0.7],
+        nms_thresholds=[0.7, 0.7, 0.7],
+    ):
         """
         Arguments:
             image: an instance of PIL.Image.
@@ -57,7 +61,7 @@ class MtcnnDetector:
 
             factor_count = 0
             while min_length > min_detection_size:
-                scales.append(m * factor ** factor_count)
+                scales.append(m * factor**factor_count)
                 min_length *= factor
                 factor_count += 1
 
@@ -68,20 +72,24 @@ class MtcnnDetector:
 
             # run P-Net on different scales
             for s in scales:
-                boxes = run_first_stage(image, self.pnet, scale=s, threshold=thresholds[0])
+                boxes = run_first_stage(
+                    image, self.pnet, scale=s, threshold=thresholds[0]
+                )
                 bounding_boxes.append(boxes)
 
             # collect boxes (and offsets, and scores) from different scales
             bounding_boxes = [i for i in bounding_boxes if i is not None]
-            if len(bounding_boxes)==0:
-                return bounding_boxes,None
+            if len(bounding_boxes) == 0:
+                return bounding_boxes, None
             bounding_boxes = np.vstack(bounding_boxes)
 
             keep = nms(bounding_boxes[:, 0:5], nms_thresholds[0])
             bounding_boxes = bounding_boxes[keep]
 
             # use offsets predicted by pnet to transform bounding boxes
-            bounding_boxes = calibrate_box(bounding_boxes[:, 0:5], bounding_boxes[:, 5:])
+            bounding_boxes = calibrate_box(
+                bounding_boxes[:, 0:5], bounding_boxes[:, 5:]
+            )
             # shape [n_boxes, 5]
 
             bounding_boxes = convert_to_square(bounding_boxes)
@@ -127,11 +135,15 @@ class MtcnnDetector:
             width = bounding_boxes[:, 2] - bounding_boxes[:, 0] + 1.0
             height = bounding_boxes[:, 3] - bounding_boxes[:, 1] + 1.0
             xmin, ymin = bounding_boxes[:, 0], bounding_boxes[:, 1]
-            landmarks[:, 0:5] = np.expand_dims(xmin, 1) + np.expand_dims(width, 1) * landmarks[:, 0:5]
-            landmarks[:, 5:10] = np.expand_dims(ymin, 1) + np.expand_dims(height, 1) * landmarks[:, 5:10]
+            landmarks[:, 0:5] = (
+                np.expand_dims(xmin, 1) + np.expand_dims(width, 1) * landmarks[:, 0:5]
+            )
+            landmarks[:, 5:10] = (
+                np.expand_dims(ymin, 1) + np.expand_dims(height, 1) * landmarks[:, 5:10]
+            )
 
             bounding_boxes = calibrate_box(bounding_boxes, offsets)
-            keep = nms(bounding_boxes, nms_thresholds[2], mode='min')
+            keep = nms(bounding_boxes, nms_thresholds[2], mode="min")
             bounding_boxes = bounding_boxes[keep]
             landmarks = landmarks[keep]
 
