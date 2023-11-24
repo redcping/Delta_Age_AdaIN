@@ -22,8 +22,8 @@ logging.basicConfig(
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
 
-aligned_csv_file_path = parent_dir+"/utkface/utkface_aligned.csv"
-csv_file_path = parent_dir+"/utkface/utkface.csv"
+aligned_csv_file_path = parent_dir+"/utkface/utkface.csv"
+csv_file_path = parent_dir+"/utkface/utkfaceold.csv"
 aligned_images_dir = parent_dir+"/utkface/aligned_images"
 
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         csv_reader = csv.reader(csv_file)
         header = next(csv_reader)
 
-        start_index = 4180
+        start_index = 12025
 
         # Create a new CSV file for aligned image data
         with open(aligned_csv_file_path, mode="a", newline="") as aligned_csv_file:
@@ -71,6 +71,6 @@ if __name__ == "__main__":
                 else:
                     logging.info(f"Unable to crop face from img: {image_path}")
 
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
                 executor.map(process_row, csv_reader)
 
