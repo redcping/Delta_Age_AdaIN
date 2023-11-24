@@ -7279,7 +7279,6 @@ age,path,type
 5,utkface/aligned_images/train/5_0_0_20170110213149382_aligned.jpg,training
 4,utkface/aligned_images/train/4_0_2_20161219141105897_aligned.jpg,training
 29,utkface/aligned_images/train/29_1_3_20170104223300263_aligned.jpg,training
-age,path,type
 1,utkface/aligned_images/train/1_1_0_20170109194244035_aligned.jpg,training
 1,utkface/aligned_images/train/1_1_3_20161219225714616_aligned.jpg,training
 25,utkface/aligned_images/train/25_1_4_20170103223722679_aligned.jpg,training
@@ -11970,7 +11969,6 @@ age,path,type
 40,utkface/aligned_images/train/40_0_0_20170116000712384_aligned.jpg,training
 25,utkface/aligned_images/train/25_1_2_20170116175250125_aligned.jpg,training
 25,utkface/aligned_images/train/25_0_0_20170117144403034_aligned.jpg,training
-age,path,type
 60,utkface/aligned_images/train/60_0_0_20170117192255540_aligned.jpg,training
 80,utkface/aligned_images/train/80_0_0_20170117175258116_aligned.jpg,training
 50,utkface/aligned_images/train/50_0_0_20170117091017638_aligned.jpg,training
