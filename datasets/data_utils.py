@@ -38,10 +38,10 @@ class DataSetFactory:
         train_transform = transforms.Compose(
             [
                 transforms.Resize(shape),
-                transforms.RandomGrayscale(0.1),
-                transforms.ColorJitter(brightness=0.5, contrast=0.5, hue=0.5),
-                # transforms.RandomRotation(degrees=(20)),
-                transforms.RandomHorizontalFlip(p=0.5),
+                # transforms.RandomGrayscale(0.1),
+                # transforms.ColorJitter(brightness=0.5, contrast=0.5, hue=0.5),
+                # # transforms.RandomRotation(degrees=(20)),
+                # transforms.RandomHorizontalFlip(p=0.5),
                 transforms.ToTensor(),
             ]
         )
