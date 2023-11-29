@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import math
+import random
 from tensorboardX import SummaryWriter
 import warnings
 
@@ -17,6 +18,7 @@ from Networks.DAANet import DAA
 from EMA import EMA
 from datasets.data_utils import DataSetFactory
 import cv2
+import matplotlib.pyplot as plt
 
 
 class AverageMeter(object):
@@ -52,6 +54,9 @@ class DAATrainer(object):
         self.set_train_params()
         self.load_model(self.config.pretrained_fn)
         self.build_data_loader()
+
+        self.train_losses = []
+        self.val_losses = []
 
         self.save_model_dir = "%s_%s_%s_%s" % (
             self.config.save_folder,
@@ -259,6 +264,8 @@ class DAATrainer(object):
         self.model.train()
         self.summary_loss = {}
         self.summary_image = {}
+        self.summary_histogram = {}
+
         print("current epoch is %d, learning_rate: %s" % (epoch, str(self.lr)))
         for n, (images, labels) in enumerate(self.train_loader):
             self.step = self.step + 1
@@ -271,6 +278,7 @@ class DAATrainer(object):
             train_outputs = self.run(images, labels, mode="train")
 
             self.total_loss = train_outputs["loss"]["total_loss"]
+            self.train_losses.append(self.total_loss.item())
 
             self.optim.zero_grad()
             self.total_loss.backward()
@@ -289,6 +297,10 @@ class DAATrainer(object):
                     self.ema.restore()
                     self.model.train()
                     self.write_summary()
+
+                    val_loss = val_outputs["loss"]["total_loss"].item()
+                    self.val_losses.append(val_loss)
+
                     train_accuracy_age = train_outputs["loss"]["accuracy"].item()
                     val_accuracy_age = val_outputs["loss"]["accuracy"].item()
                     self.accuracy_info = "%.2f-%.2f" % (

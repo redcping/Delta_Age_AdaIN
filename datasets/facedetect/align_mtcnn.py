@@ -34,6 +34,7 @@ def process(detector, img, output_size, output_path):
     # cv.imwrite('images/{}_img.jpg'.format(i), img)
     return True
 
+
 if __name__ == "__main__":
     detector = MtcnnDetector()
 
