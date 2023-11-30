@@ -29,24 +29,26 @@ class DataSetFactory:
         )
         shape = (self.config.input_size, self.config.input_size)
 
-        val_transform = transforms.Compose(
-            [
-                transforms.Resize(shape),
-                transforms.ToTensor(),
-            ]
+        self.val_transform = transforms.Compose(
+          self.config.validation_transformations
+            # [
+            #     transforms.Resize(shape),
+            #     transforms.ToTensor(),
+            # ]
         )
-        train_transform = transforms.Compose(
-            [
-                transforms.Resize(shape),
+        self.train_transform = transforms.Compose(
+            self.config.training_transformations
+            # [
+            #     transforms.Resize(shape),
                 # transforms.RandomGrayscale(0.1),
                 # transforms.ColorJitter(brightness=0.5, contrast=0.5, hue=0.5),
                 # # transforms.RandomRotation(degrees=(20)),
                 # transforms.RandomHorizontalFlip(p=0.5),
-                transforms.ToTensor(),
-            ]
+            #     transforms.ToTensor(),
+            # ]
         )
 
-        train_transform = train_transform if self.config.do_aug else val_transform
+        self.train_transform = self.train_transform if self.config.do_aug else self.val_transform
 
         if self.config.da_type == "image_template":
             if os.path.exists(self.config.image_template_path):
@@ -63,7 +65,7 @@ class DataSetFactory:
                     label, idx = select
                     image_fn = samples["training"][idx]["image"]
                     rgb = Image.open(image_fn).convert("RGB")
-                    rgb = val_transform(rgb)[None, ...]
+                    rgb = self.val_transform(rgb)[None, ...]
                     labels.append(label)
                     images.append(rgb)
                 labels = np.array(labels)
@@ -77,13 +79,13 @@ class DataSetFactory:
                 self.template_labels = torch.tensor(labels)
 
         self.training = DataSet(
-            transform=train_transform,
+            transform=self.train_transform,
             samples=samples["training"],
             type_="training",
             resize_shape=self.config.input_size,
         )
         self.testing = DataSet(
-            transform=val_transform,
+            transform=self.val_transform,
             samples=samples["testing"],
             type_="testing",
             resize_shape=self.config.input_size,
@@ -113,7 +115,6 @@ class DataSetFactory:
                 data = csv.reader(csvin)
                 next(data)
                 for row in data:
-                    print(row)
                     age = int(float(row[0]) + 0.5)
                     if (
                         age < 0
@@ -180,7 +181,9 @@ class DataSet(torch.utils.data.Dataset):
         rgb = Image.open(image_fn).convert("RGB")
 
         rgb = self.crop_and_resize_data(rgb)
-        rgbs = self.transform(rgb)
+
+        if random.random() < 0.3:
+            rgbs = self.transform(rgb)
 
         # print(sample.keys())
         for k, v in sample.items():
