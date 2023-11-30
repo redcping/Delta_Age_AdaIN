@@ -156,6 +156,13 @@ class DataSet(torch.utils.data.Dataset):
         self, transform=None, samples=None, type_="training", resize_shape=None
     ):
         self.transform = transform
+        self.basic_transform = transforms.Compose(
+            [
+                transforms.Resize(resize_shape),
+                transforms.ToTensor(),
+            ]
+        )
+
         self.samples = samples
         self.resize_shape = resize_shape
         self.type_ = type_
@@ -184,6 +191,8 @@ class DataSet(torch.utils.data.Dataset):
         rgbs = rgb
         if random.random() < 0.3:
             rgbs = self.transform(rgb)
+        else:
+            rgbs = self.basic_transform(rgb)
 
         # print(sample.keys())
         for k, v in sample.items():
