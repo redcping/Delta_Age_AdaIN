@@ -188,11 +188,7 @@ class DataSet(torch.utils.data.Dataset):
         rgb = Image.open(image_fn).convert("RGB")
 
         rgb = self.crop_and_resize_data(rgb)
-        rgbs = rgb
-        if random.random() < 0.3:
-            rgbs = self.transform(rgb)
-        else:
-            rgbs = self.basic_transform(rgb)
+        rgbs = self.transform(rgb)
 
         # print(sample.keys())
         for k, v in sample.items():
