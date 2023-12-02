@@ -129,7 +129,7 @@ class DataSetFactory:
                     # Count the number of samples for each age
                     age_count = len(age_samples[age])
                     print(f"age_count [{age}]: {age_count}")
-                    if age_count < 2200:  # Check if the age has less than 2200 samples
+                    if age_count < 1200:  # Check if the age has less than 2200 samples
 
                         sample = {"gt_age": age}
 
