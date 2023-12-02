@@ -4,7 +4,7 @@ import math
 import random
 from tensorboardX import SummaryWriter
 import warnings
-
+import logging
 warnings.filterwarnings("ignore")
 from PIL import Image
 
@@ -57,6 +57,11 @@ class DAATrainer(object):
 
         self.train_losses = []
         self.val_losses = []
+
+        self.epoch_train_losses = []
+        self.epoch_train_accuracies = []
+        self.epoch_val_losses = []
+        self.epoch_val_accuracies = []
 
         self.save_model_dir = "%s_%s_%s_%s" % (
             self.config.save_folder,
@@ -170,12 +175,14 @@ class DAATrainer(object):
 
         self.model.load_state_dict(model_dict, strict=True)
         print("The model in path %s has been loaded successfully!" % model_fn)
+        logging.info("The model in path %s has been loaded successfully!" % model_fn)
 
     def save_model(self, epoch):
         self.ema.apply_shadow()
         state = {"net": self.model.state_dict(), "optimizer": self.optim.state_dict()}
-        save_fn = "%s/%s_epoch_%d_ac_%s.pth" % (
+        save_fn = "%s/%s_%s_epoch_%d_ac_%s.pth" % (
             self.save_model_dir,
+            self.config.model_purpose,
             self.config.backbone,
             epoch,
             self.accuracy_info,
@@ -183,6 +190,10 @@ class DAATrainer(object):
         torch.save(state, save_fn)
         self.ema.restore()
         print(
+            "The model of the %d epoch is successfully stored in path %s!"
+            % (epoch, save_fn)
+        )
+        logging.info(
             "The model of the %d epoch is successfully stored in path %s!"
             % (epoch, save_fn)
         )
@@ -234,6 +245,10 @@ class DAATrainer(object):
             "train begin,total step is %d, total epochs is %d"
             % (self.max_iter_step - self.step, self.epochs - pre_epoch)
         )
+        logging.info(
+            "train begin,total step is %d, total epochs is %d"
+            % (self.max_iter_step - self.step, self.epochs - pre_epoch)
+        )
         for epoch in range(pre_epoch, self.epochs + 1):
             self.train_epoch(epoch)
             if epoch % 5 == 0:
@@ -265,8 +280,13 @@ class DAATrainer(object):
         self.summary_loss = {}
         self.summary_image = {}
         self.summary_histogram = {}
+        # Initialize accumulators for losses and accuracies
+        total_train_loss = 0
+        total_train_accuracy = 0
+        train_batches = 0
 
         print("current epoch is %d, learning_rate: %s" % (epoch, str(self.lr)))
+        logging.info("current epoch is %d, learning_rate: %s" % (epoch, str(self.lr)))
         for n, (images, labels) in enumerate(self.train_loader):
             self.step = self.step + 1
             self.adjust_learning_rate(self.optim)
@@ -276,58 +296,117 @@ class DAATrainer(object):
             self.summary_histogram = {}
 
             train_outputs = self.run(images, labels, mode="train")
+            train_loss = train_outputs["loss"]["total_loss"]
+            train_accuracy = train_outputs["loss"]["accuracy"]
 
             self.total_loss = train_outputs["loss"]["total_loss"]
-            self.train_losses.append(self.total_loss.item())
+            # self.train_losses.append(self.total_loss.item())
 
             self.optim.zero_grad()
             self.total_loss.backward()
             self.optim.step()
             self.ema.update_params()
 
-            self.syth_losses.update(self.total_loss.detach().item(), images.shape[0])
-            self.summary_loss["train/avg_loss"] = self.syth_losses.avg
+            # self.syth_losses.update(self.total_loss.detach().item(), images.shape[0])
+            # self.summary_loss["train/avg_loss"] = self.syth_losses.avg
+
+            # Update training metrics
+            total_train_loss += train_loss.item()
+            total_train_accuracy += train_accuracy.item()
+            train_batches += 1
 
             if n % 50 == 0:
                 with torch.no_grad():
                     x_val, y_val = self.get_val_batch()
                     self.model.eval()
                     self.ema.apply_shadow()
-                    val_outputs = self.run(x_val, y_val, "val")
+
+                    # Initialize accumulators for validation metrics
+                    total_val_loss = 0
+                    total_val_accuracy = 0
+                    val_batches = 0
+
+                    for x_val, y_val in self.val_loader:
+                        val_outputs = self.run(x_val, y_val, "val")
+                        val_loss = val_outputs["loss"]["total_loss"]
+                        val_accuracy = val_outputs["loss"]["accuracy"]  # Assuming accuracy is part of val_outputs
+
+                        total_val_loss += val_loss.item()
+                        total_val_accuracy += val_accuracy.item()
+                        val_batches += 1
+
                     self.ema.restore()
                     self.model.train()
-                    self.write_summary()
 
-                    val_loss = val_outputs["loss"]["total_loss"].item()
-                    self.val_losses.append(val_loss)
+                    # Calculate average validation metrics for this checkpoint
+                    avg_val_loss = total_val_loss / val_batches if val_batches > 0 else 0
+                    avg_val_accuracy = total_val_accuracy / val_batches if val_batches > 0 else 0
 
-                    train_accuracy_age = train_outputs["loss"]["accuracy"].item()
-                    val_accuracy_age = val_outputs["loss"]["accuracy"].item()
-                    self.accuracy_info = "%.2f-%.2f" % (
-                        train_accuracy_age,
-                        val_accuracy_age,
-                    )
                     print(
-                        "epoch:{},iter:{},total_loss:{},train/val: {}".format(
-                            epoch,
-                            self.step,
-                            self.total_loss.detach().cpu(),
-                            self.accuracy_info,
-                        )
+                        f"Validation - Epoch: {epoch}, Loss: {avg_val_loss:.4f}, Accuracy: {avg_val_accuracy:.4f}"
                     )
-            del train_outputs, self.total_loss
+                    logging.info(
+                        f"Validation - Epoch: {epoch}, Loss: {avg_val_loss:.4f}, Accuracy: {avg_val_accuracy:.4f}"
+                    )
+        # Calculate average training metrics for the epoch
+        avg_train_loss = total_train_loss / train_batches if train_batches > 0 else 0
+        avg_train_accuracy = total_train_accuracy / train_batches if train_batches > 0 else 0
+
+        # Store the average metrics for the epoch
+        self.epoch_train_losses.append(avg_train_loss)
+        self.epoch_train_accuracies.append(avg_train_accuracy)
+
+        # Assuming you want to also capture the last validation metrics of the epoch
+        self.epoch_val_losses.append(avg_val_loss)
+        self.epoch_val_accuracies.append(avg_val_accuracy)
+        train_accuracy_age = train_outputs["loss"]["accuracy"].item()
+        val_accuracy_age = val_outputs["loss"]["accuracy"].item()
+
+        self.accuracy_info = "%.2f-%.2f" % (
+            train_accuracy_age,
+            val_accuracy_age,
+        )
+
+        print(
+            f"Training - Epoch: {epoch}, Loss: {avg_train_loss:.4f}, Accuracy: {avg_train_accuracy:.4f}"
+        )
+        logging.info(f"Training - Epoch: {epoch}, Loss: {avg_train_loss:.4f}, Accuracy: {avg_train_accuracy:.4f}")
+                    # val_outputs = self.run(x_val, y_val, "val")
+                    # self.ema.restore()
+                    # self.model.train()
+                    # self.write_summary()
+
+                    # val_loss = val_outputs["loss"]["total_loss"].item()
+                    # self.val_losses.append(val_loss)
+
+                    # print(
+                    #     "epoch:{},iter:{},total_loss:{},train/val: {}".format(
+                    #         epoch,
+                    #         self.step,
+                    #         self.total_loss.detach().cpu(),
+                    #         self.accuracy_info,
+                    #     )
+                    # )
+
+            # del train_outputs, self.total_loss
 
     def test(self):
         self.model.eval()
         cnt, sum_diff = 0, 0
         acc = [0, 0, 0, 0]
         acc_th = [1, 3, 5, 7]
-        print("total samples:", len(self.val_loader))
+        l1_losses = []
+        message = "total samples:", len(self.val_loader)
+        print(message)
+        logging.info(message)
+
         for n, (x_val, y_val) in enumerate(self.val_loader):
             output = self.run(x_val, y_val, "test")
+            # print(output)
             diff = output["l1"].detach().cpu().item()
+            # print(diff)
             # print(diff<=3)
-
+            l1_losses.append(diff)
             for c in range(len(acc)):
                 acc[c] = acc[c] + (1.0 if diff <= acc_th[c] else 0.0)
 
@@ -336,20 +415,13 @@ class DAATrainer(object):
 
             if cnt % 1000 == 0:
                 print(cnt, sum_diff / cnt, acc)
+                logging.info(cnt, sum_diff / cnt, acc)
+        msg=f"l1: {sum_diff / cnt}"
+        print(msg)
+        logging.info(msg)
 
-        print("l1:", sum_diff / cnt)
-        print(["ca{}:{}".format(acc_th[i], acc[i] / cnt) for i in range(len(acc))])
+        msg =["ca{}:{}".format(acc_th[i], acc[i] / cnt) for i in range(len(acc))]
+        print(msg)
+        logging.info(msg)
 
-
-if __name__ == "__main__":
-    torch.cuda.empty_cache()
-    torch.backends.cudnn.enabled = True
-    torch.backends.cudnn.benchmark = True
-    from config import Config
-
-    cfg = Config()
-    trainer = DAATrainer(cfg)
-    if cfg.mode == "test":
-        trainer.test()
-    else:
-        trainer.train()
+        return l1_losses

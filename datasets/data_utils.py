@@ -126,19 +126,24 @@ class DataSetFactory:
                     age = max(age, self.config.min_age)
                     age = min(age, self.config.max_age)
                     age = age - self.config.min_age
-                    sample = {"gt_age": age}
+                    # Count the number of samples for each age
+                    age_count = len(age_samples[age])
 
-                    # row[2]: data path
-                    image_fn = row[1]
-                    sample["image"] = (
-                        image_fn
-                        if self.config.data_folder in image_fn
-                        else self.config.data_folder + image_fn
-                    )
-                    kk = row[2]  # ['training' or 'testing']
-                    samples[kk].append(sample)
-                    if kk == "training":
-                        age_samples[age].append(len(samples[kk]) - 1)
+                    if age_count < 2200:  # Check if the age has less than 2200 samples
+
+                        sample = {"gt_age": age}
+
+                        # row[2]: data path
+                        image_fn = row[1]
+                        sample["image"] = (
+                            image_fn
+                            if self.config.data_folder in image_fn
+                            else self.config.data_folder + image_fn
+                        )
+                        kk = row[2]  # ['training' or 'testing']
+                        samples[kk].append(sample)
+                        if kk == "training":
+                            age_samples[age].append(len(samples[kk]) - 1)
 
         if self.config.da_type == "image_template" and not os.path.exists(
             self.config.image_template_path

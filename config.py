@@ -1,6 +1,6 @@
 import os
-
-
+shape=(128,128)
+import torchvision.transforms as transforms
 class Config:
     def __init__(self):
         # data
@@ -9,6 +9,18 @@ class Config:
         self.do_aug = True
         self.num_works = 4
 
+        #utils
+        self.model_purpose=""
+        self.validation_transformations = [
+                            transforms.Resize(shape),
+                transforms.ToTensor(),
+
+        ]
+        self.training_transformations = [
+            transforms.Resize(shape),
+            transforms.ToTensor(),
+
+        ]
         # train
         self.batch_size = 64
         self.lr = 1e-3
@@ -20,7 +32,7 @@ class Config:
         self.accuracy_threshold = 7
         self.do_multiscale = False
         self.mode = "train" if self.batch_size > 1 else "test"
-        self.save_folder = "./models/{}".format(self.datanames)
+        # self.save_folder = "/content/gdrive/MyDrive/CV_DAA_PROJ/DAA_models/{}_{}".format(self.model_purpose,self.datanames)
 
         # net
         self.backbone = "resnet18"  # ['c3ae','resnet18']
@@ -35,3 +47,6 @@ class Config:
 
         self.pretrained_fn = ""
         self.pretrained_ex_params = []
+
+    def save_model_folder(self):
+        self.save_folder = "/content/gdrive/MyDrive/CV_DAA_PROJ/DAA_models/{}_{}".format(self.model_purpose,self.datanames)
