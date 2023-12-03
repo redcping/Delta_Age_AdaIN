@@ -129,7 +129,7 @@ class DataSetFactory:
                     age = max(age, self.config.min_age)
                     age = min(age, self.config.max_age)
                     age = age - self.config.min_age
-                    if age_sample_count[age] >= max_samples_per_age:
+                    if age_sample_count[age] >= max_samples_per_age or age in [0,1,2,3,4,5]:
                         # print(f"age: {age}; age_sample_count[]: {age_sample_count[age]}")
                         continue
                     sample = {"gt_age": age}
