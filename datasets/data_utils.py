@@ -130,7 +130,7 @@ class DataSetFactory:
                     age = min(age, self.config.max_age)
                     age = age - self.config.min_age
                     if age_sample_count[age] >= max_samples_per_age:
-                        print(f"age: {age}; age_sample_count[]: {age_sample_count[age]}")
+                        # print(f"age: {age}; age_sample_count[]: {age_sample_count[age]}")
                         continue
                     sample = {"gt_age": age}
 
@@ -154,7 +154,7 @@ class DataSetFactory:
             samples["select_idxs"] = self.random_choose_template(age_samples)
 
         for k in range(self.config.num_classes):
-            print(k, len(age_samples[k]))
+            print(f"Age {k}: {len(age_samples[k])}")
 
         return samples
 
