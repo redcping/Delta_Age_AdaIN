@@ -108,8 +108,8 @@ class DataSetFactory:
         samples["training"] = []
         samples["testing"] = []
         age_samples = [[] for k in range(self.config.num_classes)]
-        max_samples_per_age = 800
-        age_sample_count = [0] * self.config.num_classes
+        # # max_samples_per_age = 800
+        # # age_sample_count = [0] * self.config.num_classes
 
         for name in self.config.datanames.split(","):
             filename = self.config.data_folder + name + "/" + name + ".csv"
@@ -129,9 +129,9 @@ class DataSetFactory:
                     age = max(age, self.config.min_age)
                     age = min(age, self.config.max_age)
                     age = age - self.config.min_age
-                    if age_sample_count[age] >= max_samples_per_age or age in [0,1,2,3,4,5]:
-                        # print(f"age: {age}; age_sample_count[]: {age_sample_count[age]}")
-                        continue
+                    # # if age_sample_count[age] >= max_samples_per_age or age in [0,1,2,3,4,5]:
+                    # #     # print(f"age: {age}; age_sample_count[]: {age_sample_count[age]}")
+                    # #     continue
                     sample = {"gt_age": age}
 
                     # row[2]: data path
@@ -145,7 +145,7 @@ class DataSetFactory:
                     samples[kk].append(sample)
                     if kk == "training":
                         age_samples[age].append(len(samples[kk]) - 1)
-                        age_sample_count[age] += 1  # Increment the sample count for this age
+                        ## age_sample_count[age] += 1  # Increment the sample count for this age
 
 
         if self.config.da_type == "image_template" and not os.path.exists(
