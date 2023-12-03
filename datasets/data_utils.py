@@ -108,7 +108,7 @@ class DataSetFactory:
         samples["training"] = []
         samples["testing"] = []
         age_samples = [[] for k in range(self.config.num_classes)]
-        max_samples_per_age = 1200
+        max_samples_per_age = 800
         age_sample_count = [0] * self.config.num_classes
 
         for name in self.config.datanames.split(","):
