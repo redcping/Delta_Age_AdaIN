@@ -108,6 +108,9 @@ class DataSetFactory:
         samples["training"] = []
         samples["testing"] = []
         age_samples = [[] for k in range(self.config.num_classes)]
+        max_samples_per_age = 1200
+        age_sample_count = [0] * self.config.num_classes
+
         for name in self.config.datanames.split(","):
             filename = self.config.data_folder + name + "/" + name + ".csv"
 
@@ -126,24 +129,23 @@ class DataSetFactory:
                     age = max(age, self.config.min_age)
                     age = min(age, self.config.max_age)
                     age = age - self.config.min_age
-                    # Count the number of samples for each age
-                    age_count = len(age_samples[age])
-                    print(f"age_count [{age}]: {age_count}")
-                    if age_count < 1200:  # Check if the age has less than 2200 samples
+                    if age_sample_count[age] >= max_samples_per_age:
+                        continue
+                    sample = {"gt_age": age}
 
-                        sample = {"gt_age": age}
+                    # row[2]: data path
+                    image_fn = row[1]
+                    sample["image"] = (
+                        image_fn
+                        if self.config.data_folder in image_fn
+                        else self.config.data_folder + image_fn
+                    )
+                    kk = row[2]  # ['training' or 'testing']
+                    samples[kk].append(sample)
+                    if kk == "training":
+                        age_samples[age].append(len(samples[kk]) - 1)
+                        age_sample_count[age] += 1  # Increment the sample count for this age
 
-                        # row[2]: data path
-                        image_fn = row[1]
-                        sample["image"] = (
-                            image_fn
-                            if self.config.data_folder in image_fn
-                            else self.config.data_folder + image_fn
-                        )
-                        kk = row[2]  # ['training' or 'testing']
-                        samples[kk].append(sample)
-                        if kk == "training":
-                            age_samples[age].append(len(samples[kk]) - 1)
 
         if self.config.da_type == "image_template" and not os.path.exists(
             self.config.image_template_path
