@@ -145,7 +145,7 @@ class DataSetFactory:
                     samples[kk].append(sample)
                     if kk == "training":
                         age_samples[age].append(len(samples[kk]) - 1)
-                        # age_sample_count[age] += 1  # Increment the sample count for this age
+                        age_sample_count[age] += 1  # Increment the sample count for this age
 
 
         if self.config.da_type == "image_template" and not os.path.exists(
