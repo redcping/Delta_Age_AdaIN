@@ -1,3 +1,14 @@
+# Project Readme CSI 5341
+The original repository was modified.
+pipeline.py was added to run all pipelines
+test_cv_proj.ipynb is the colab version of the testing pipeline.
+main_cv_proj.ipynb is the main colab version of the training and testing pipeline
+Dataset/utkface/generate_csv.py is the pipeline to create a csv dataset for the utkface images
+The dataset repository is here: https://github.com/codezart/DAA_Dataset
+link to this repository is here: https://github.com/codezart/Delta_Age_AdaIN
+
+
+
 # DAA: A Delta Age AdaIN operation for age estimation via binary code transformer (CVPR2023)
 ![license](https://img.shields.io/badge/License-MIT-brightgreen)
 ![python](https://img.shields.io/badge/Python-3.8-blue)

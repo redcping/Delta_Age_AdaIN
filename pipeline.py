@@ -123,6 +123,36 @@ class Pipeline():
             else:
                 self.training_pipeline()
                 self.testing_pipeline()
+    def test_pretrained_models(self):
+        for config_instance in self.test_configs:
+
+            self.cfg = Config()
+            for key, value in config_instance.items():
+                setattr(self.cfg, key, value)
+
+            self.cfg.save_model_folder()
+            self.trainer = DAATrainer(self.cfg)
+
+            print(f"save_model_dir: {self.trainer.save_model_dir}")
+
+            os.makedirs(self.trainer.save_model_dir, exist_ok=True)
+            log_file_path = os.path.join(self.trainer.save_model_dir, "session.log")
+            logging.basicConfig(
+                filename=log_file_path,
+                level=logging.INFO,
+                format='%(asctime)s - %(levelname)s - %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S',
+                force=True  # Force applying this configuration
+            )
+
+            print(self.cfg.__dict__)
+            print(self.cfg.mode)
+
+            if self.cfg.mode == "test":
+                self.testing_pipeline()
+            else:
+                self.training_pipeline()
+                self.testing_pipeline()
 
 def custom_gaussian_blur(image):
     # Define your custom Gaussian blur operation here
@@ -247,3 +277,5 @@ if __name__ == "__main__":
 		test_configs= test_configs_megaage_asian50[2:]
 	)
 	utkface_pipeline.run()
+
+

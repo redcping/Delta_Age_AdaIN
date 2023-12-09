@@ -19,6 +19,7 @@ from EMA import EMA
 from datasets.data_utils import DataSetFactory
 import cv2
 import matplotlib.pyplot as plt
+from imblearn.under_sampling import RandomUnderSampler
 
 
 class AverageMeter(object):
@@ -97,6 +98,8 @@ class DAATrainer(object):
 
     def build_data_loader(self):
         factory = DataSetFactory(self.config)
+
+
         self.train_loader = DataLoader(
             factory.training,
             batch_size=self.batch_size,
