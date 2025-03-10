@@ -15,10 +15,11 @@ The preprint version is public at [arxiv](https://arxiv.org/abs/2303.07929)
 # Citation
 If you find this work helpful in your research, please consider citing our paper:
 ```
-@inproceedings{chen2023_DAA,
-  title     = {DAA: A Delta Age AdaIN operation for age estimation via binary code transformer},
-  author    = {Ping, Chen and Xingpeng, Zhang and Ye, Li and Ju, Tao and Bin, Xiao and Bing, Wang and Zongjie, Jiang},
-  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year      = {2023}
+@inproceedings{chen2023daa,
+  title={DAA: A Delta Age AdaIN operation for age estimation via binary code transformer},
+  author={Chen, Ping and Zhang, Xingpeng and Li, Ye and Tao, Ju and Xiao, Bin and Wang, Bing and Jiang, Zongjie},
+  booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition},
+  pages={15836--15845},
+  year={2023}
 }
 ```
